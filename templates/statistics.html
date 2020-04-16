@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Statistics - Make-a-Poll</title>
+  <link rel="shortcut icon" href="/static/images/favicon.ico">
+  <link rel="stylesheet" href="/static/css/bulma-0.8.0/css/bulma.min.css">
+  <link rel="stylesheet" href="/static/css/fontawesome-free-5.13.0-web/css/all.min.css">
+  <script type="text/javascript" src="/static/js/jquery-3.5.0.js"></script>
+  <style type="text/css">
+    html
+    { 
+        background: url(/static/images/back.png) no-repeat center center fixed; 
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        -webkit-font-smoothing: antialiased;
+    }
+    .navbar.is-warning
+    {
+        background-color: #FFFF56;
+    }
+    @font-face
+    {
+        font-family: ProductSans;
+        src: url(/static/fonts/ProductSans.woff2);
+    }
+    body
+    {
+        font-family: 'ProductSans', sans-serif;
+    }
+    .header
+    {
+        overflow: hidden;
+        background-color: #000;
+        padding: 10px 10px;
+    }
+    .header .logo
+    {
+        font-size: 20px;
+        text-align: center;
+        color: yellow;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    .fig
+    {
+      background-image: linear-gradient(#54BBFF, #4094FFDB);
+      text-align: center;
+      border-radius: 30px;
+      display: inline-block;
+      padding: 15px;
+      width: 250px;
+      position: relative;
+      z-index: 1;
+      -webkit-transition: all 1s ease;
+      transition: all 0.2s ease;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .fig::before
+    {
+      position: absolute;
+      content: "";
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-image: linear-gradient(#FFA2C9, #FF7FB5);
+      border-radius: 28px;
+      z-index: -1;
+      transition: opacity 0.7s ease;
+      opacity: 0;
+    }
+    .fig:hover::before
+    {
+      opacity: 1;
+      border-radius: 28px;
+    }
+    .fig.link:hover
+    {
+      cursor: pointer;
+    }
+  </style>
+  <script type="text/javascript">
+    $(document).ready(function()
+    {
+      $(".navbar-burger").click(function()
+      {
+        $(".navbar-burger").toggleClass("is-active");
+        $(".navbar-menu").toggleClass("is-active");
+      });
+      $('#all').fadeIn(300);
+    });
+    function topPoll()
+    {
+      window.location.href='poll/{{ top_poll_id }}';
+    }
+  </script>
+</head>
+<body>
+    <div class="header"><center><div class="logo"><span class="icon"><i class="fas fa-poll-h"></i>&nbsp;</span>Make-a-Poll</div></center></div> 
+    <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/"><span class="icon"><i class="fas fa-home"></i></span>&nbsp;Make-a-Poll</a>
+            <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbar">
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div id="navbar" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/popular"><span class="icon"><i class="fab fa-hotjar"></i></span>&nbsp;Popular polls</a>
+                <a class="navbar-item" href="/recent"><span class="icon"><i class="fas fa-history"></i></span>&nbsp;Recent polls</a>
+                <a class="navbar-item" href="/stats" style="background-color: #FBFBFB;color: red"><span class="icon"><i class="fas fa-chart-bar"></i></span>&nbsp;Statistics</a>
+                <a class="navbar-item" href="/about"><span class="icon"><i class="fas fa-info-circle"></i></span>&nbsp;About</a>
+            </div>
+        </div>
+    </nav>
+    <br>
+    <div class="columns" id="all" style="display: none">
+        <div class="column is-narrow"></div>
+        <div class="column">
+          <div class="box fig" style="width: 100%"><font size="30%">{{ poll_count }}</font><span><br>POLLS CREATED</span></div><br>
+          <div class="box fig" style="width: 49%"><font size="30%">{{ public_polls }}</font><span><br>PUBLIC POLLS</span></div>
+          <div class="box fig" style="width: 49%;float:right"><font size="30%">{{ private_polls }}</font><span><br>PRIVATE POLLS</span></div><br>
+          <div class="box fig" style="width: 100%"><font size="30%">{{ total_votes }}</font><span><br>VOTES CAST</span></div><br>
+          <div class="box fig link" style="width: 100%" onclick="topPoll()"><p class="title is-4">{{ top_poll_question }}</p><p class="subtitle is-6">{{ top_poll_votes }} votes</p><span>MOST POPULAR POLL</span></div>
+        </div>
+        <div class="column is-narrow"></div>
+    </div>
+</body>
+</html>

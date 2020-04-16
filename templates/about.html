@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About Make-a-Poll</title>
+  <link rel="shortcut icon" href="/static/images/favicon.ico">
+  <link rel="stylesheet" href="/static/css/bulma-0.8.0/css/bulma.min.css">
+  <link rel="stylesheet" href="/static/css/fontawesome-free-5.13.0-web/css/all.min.css">
+  <script type="text/javascript" src="/static/js/jquery-3.5.0.js"></script>
+  <style type="text/css">
+  html
+  {
+      background: url(/static/images/back.png) no-repeat center center fixed;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
+      -webkit-font-smoothing: antialiased;
+  }
+  @font-face
+  {
+    font-family: ProductSans;
+    src: url(/static/fonts/ProductSans.woff2);
+  }
+  body
+  {
+    font-family: 'ProductSans', sans-serif;
+  }
+  .navbar.is-warning
+  {
+    background-color: #FFFF56;
+  }
+  .header
+  {
+      overflow: hidden;
+      background-color: #000;
+      padding: 10px 10px;
+  }
+  .header .logo
+  {
+      font-size: 20px;
+      text-align: center;
+      color: yellow;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+        -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+  }
+  .column
+  {
+    padding-top: 50px;
+    font-size: 21px;
+  }
+  </style>
+</head>
+
+<body>
+  <script type="text/javascript">
+    $(document).ready(function()
+    {
+      $(".navbar-burger").click(function()
+      {
+            $(".navbar-burger").toggleClass("is-active");
+            $(".navbar-menu").toggleClass("is-active");
+      });
+      $('#all').fadeIn(300);
+    });
+  </script>
+  <div class="header"><center><div class="logo"><span class="icon"><i class="fas fa-poll-h"></i>&nbsp;</span>Make-a-Poll</div></center></div>
+    <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="/"><span class="icon"><i class="fas fa-home"></i></span>&nbsp;Make-a-Poll</a>
+        <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbar">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+      </a>
+      </div>
+      <div id="navbar" class="navbar-menu">
+        <div class="navbar-start">
+            <a class="navbar-item" href="/popular"><span class="icon"><i class="fab fa-hotjar"></i></span>&nbsp;Popular polls</a>
+            <a class="navbar-item" href="/recent"><span class="icon"><i class="fas fa-history"></i></span>&nbsp;Recent polls</a>
+            <a class="navbar-item" href="/stats"><span class="icon"><i class="fas fa-chart-bar"></i></span>&nbsp;Statistics</a>
+            <a class="navbar-item" href="/about" style="background-color: #FBFBFB;color: red"><span class="icon"><i class="fas fa-info-circle"></i></span>&nbsp;About</a>
+        </div>
+    </div>
+    <div class="navbar-end"></div>
+  </nav>
+  <br>
+  <div class="columns" id="all" style="display: none">
+    <div class="column is-narrow"></div>
+      <div class="column"><center>
+      <p>Make-a-Poll <span class="icon"><i class="fa fa-poll-h" style="color: red;"></i></span> lets you effortlessly create polls and analyze the results.</p><br>
+      <p><i><font color="#FF7FB5" style="outline: 2px dotted rgb(90, 164, 255);-moz-outline-radius: 10px;">&nbsp;<span class="icon"><i class="fas fa-users"></i></span> Team Members&nbsp;</font></i><br>
+        Aravind<br>
+        Apoorve<br>
+        Pratyush</p><br>
+      <p>Made using <span class="icon"><i class="fab fa-css3-alt" style="color: #264de4"></i></span> Bulma.css, <span class="icon"><i class="fab fa-js-square" style="color: #FFD500;"></i></span> jquery, jquery-qrcode, Chart.js, <span class="icon"><i class="fas fa-database" style="color: #70bfaa;"></i></span> MongoDB and <span class="icon"><i class="fab fa-font-awesome-flag" style="color: #339af0;"></i></span> Font Awesome.<br><br>Built with <img src="/static/images/flask.svg" height="16px" width="16px"> Flask.</p></center>
+    </div>
+  </div>
+</body>
+</html>

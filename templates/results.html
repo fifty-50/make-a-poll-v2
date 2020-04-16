@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ question }} - Results - Make-a-Poll</title>
+  <link rel="shortcut icon" href="/static/images/favicon.ico">
+  <link rel="stylesheet" href="/static/css/bulma-0.8.0/css/bulma.min.css">
+  <link rel="stylesheet" href="/static/css/bulma-0.8.0/css/bulma-checkradio.min.css">
+  <link rel="stylesheet" href="/static/css/fontawesome-free-5.13.0-web/css/all.min.css">
+  <script type="text/javascript" src="/static/js/Chart.min.js"></script>
+  <script type="text/javascript" src="/static/js/jquery-3.5.0.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.qrcode.min.js"></script>
+  <style type="text/css">
+    html
+    {
+        background: url(/static/images/back.png) no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+        -webkit-font-smoothing: antialiased;
+    }
+    @font-face
+    {
+        font-family: ProductSans;
+        src: url(/static/fonts/ProductSans.woff2);
+    }
+    body
+    {
+      font-family: 'ProductSans', sans-serif;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .box
+    {
+      -webkit-font-smoothing: antialiased;
+       background-image: linear-gradient(#FFA2C9, #FF7FB5);
+    }
+    #sim
+    {
+      position: relative;
+      background-image: linear-gradient(#54BBFF, #4094FFDB);
+      z-index: 1;
+    }
+    #sim::before
+    {
+      position: absolute;
+      content: "";
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-image: linear-gradient(#FFA2C9, #FF7FB5);
+      border-radius: 4px;
+      z-index: -1;
+      transition: opacity 0.7s ease;
+      opacity: 0;
+    }
+    #sim:hover::before
+    {
+      opacity: 1;
+      border-radius: 4px;
+    }
+    #sim:hover
+    {
+      cursor: pointer;
+    }
+    .navbar.is-warning
+    {
+      background-color: #FFFF56;
+    }
+    #share-buttons img
+    {
+      width: 60px;
+      padding: 5px;
+      border: 0;
+      box-shadow: 0;
+      display: inline;
+    }
+    .header
+    {
+        overflow: hidden;
+        background-color: #000;
+        padding: 10px 10px;
+    }
+    .header .logo
+    {
+        font-size: 20px;
+        text-align: center;
+        color: yellow;
+    }
+    a img:hover
+    {
+      outline: 2px dotted rgb(90, 164, 255);
+      -moz-outline-radius: 10px;
+    }
+    #myChart {
+      image-rendering: optimizeSpeed;             /* Older versions of FF */
+      image-rendering: -moz-crisp-edges;          /* FF 6.0+ */
+      image-rendering: -webkit-optimize-contrast; /* Webkit (non standard naming) */
+      image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+      image-rendering: crisp-edges;               /* Possible future browsers. */
+      -ms-interpolation-mode: nearest-neighbor;   /* IE (non standard naming) */
+    }
+  </style>
+</head>
+<body>
+  <div class="header"><center><div class="logo"><span class="icon"><i class="fas fa-poll-h"></i>&nbsp;</span>Make-a-Poll</div></center></div>
+  <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+      <a class="navbar-item" href="/"><span class="icon"><i class="fas fa-home"></i></span>&nbsp;Make-a-Poll</a>
+      <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbar">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div id="navbar" class="navbar-menu">
+      <div class="navbar-start">
+          <a class="navbar-item" href="/popular"><span class="icon"><i class="fab fa-hotjar"></i></span>&nbsp;Popular polls</a>
+          <a class="navbar-item" href="/recent"><span class="icon"><i class="fas fa-history"></i></span>&nbsp;Recent polls</a>
+          <a class="navbar-item" href="/stats"><span class="icon"><i class="fas fa-chart-bar"></i></span>&nbsp;Statistics</a>
+          <a class="navbar-item" href="/about"><span class="icon"><i class="fas fa-info-circle"></i></span>&nbsp;About</a>
+      </div>
+    </div>
+    <div class="navbar-end"></div>
+  </nav>
+  <br>
+  <div class="columns">
+    <div class="column is-narrow"></div>
+    <div class="column">
+      <center class="title is-4"><span style="background-color: #4094FFDB; border-radius: 4px" ondblclick="refresh_colours()">&nbsp;Live Results&nbsp;</span></center>
+      <div class="box">
+      <div id="pollDat" style="text-align: center;"></div>
+      <center><div id="canvas-holder" style="max-width: 335px"><canvas id="myChart" width="400" height="400"></canvas></div></center>
+      <script type="text/javascript">
+        $(document).ready(function()
+        {
+          $(".navbar-burger").click(function()
+          {
+                $(".navbar-burger").toggleClass("is-active");
+                $(".navbar-menu").toggleClass("is-active");
+          });
+          (function update_results()
+          {
+            setTimeout(function(){
+                       $.ajax({url: '/poll/{{ poll_id }}/votes', method: 'GET',
+                               success: function(data){
+                                latest_votes = data.split('█');
+                                var total_votes = 0;
+                                for(var i=0;i<{{ numberOfOptions }};++i)
+                                {
+                                  myPieChart.data.datasets[0].data[i] = latest_votes[i];
+                                  total_votes += Number(latest_votes[i]);
+                                }
+                                myPieChart.update();
+                                var desc_text = $('#desc').html();
+                                $('#desc').html('Total votes: ' + total_votes + desc_text.substring(desc_text.indexOf(' |')));
+                               },
+                               complete: update_results, timeout: 2500})},
+                       4000);
+          })();
+        });
+        var dat = document.getElementById('pollDat');
+        dat.innerHTML='';
+        var vl='';
+        if({{ expired }})
+          vl='Voting has closed.';
+        else if({{ limited }})
+          vl='Voting limit reached.';
+        var creationTime=new Date({{ creationTime }});
+        var currentTime=Date.now();
+        function poll()
+        {
+          window.open('/poll/{{ poll_id }}', '_blank');
+        }
+        if({{ expirable }})
+        {
+          if(vl=='')
+          {
+            var hours_text = 'hour';
+            var minutes_text = 'minute';
+            if({{ time_left }} > 1)
+              hours_text += 's';
+            if({{ expiry_m }} > 1)
+              minutes_text += 's';
+            if({{ time_left }}<=1)
+              dat.innerHTML+='<p class="title is-4">{{ question }}<font color="#FA0000" size="2"> '+ vl +'</font></p><p id="desc" class="subtitle is-7">Total votes: {{ votes }} | {{ time_text }} | Voting closes in {{ expiry_m }} '+ minutes_text +' | <a onclick="poll()">Vote</a>';
+            else
+              dat.innerHTML+='<p class="title is-4">{{ question }}<font color="#FA0000" size="2"> '+ vl +'</font></p><p id="desc" class="subtitle is-7">Total votes: {{ votes }} | {{ time_text }} | Voting closes in {{ expiry_h }} '+ hours_text +' and {{ expiry_m }} '+ minutes_text +' | <a onclick="poll()">Vote</a>';
+          }
+          else
+            dat.innerHTML+='<p class="title is-4">{{ question }}<font color="#FA0000" size="2"> '+vl+'</font></p><p id="desc" class="subtitle is-7">Total votes: {{ votes }} | {{ time_text }}';
+        }
+        else if(vl=='')
+        {
+          dat.innerHTML+='<p class="title is-4">{{ question }}</p>'+'<p id="desc" class="subtitle is-7">Total votes: {{ votes }} | {{ time_text }} | <a onclick="poll()">Vote</a>';
+        }
+        else
+        {
+          dat.innerHTML+='<p class="title is-4">{{ question }}<font color="#FA0000" size="2"> '+vl+'</font></p><p id="desc" class="subtitle is-7">Total votes: {{ votes }} | {{ time_text }}';
+        }
+        var qr_shown=0;
+        function qr()
+        {
+          if(qr_shown==1)
+          {
+            $("html").animate({ scrollTop: 0 }, "fast",function(){qr_shown=0;
+            $('#qrcode').fadeOut();
+            $('#qrcode').empty();});
+            return;
+          }
+          qr_shown=1;
+          $('#qrcode').qrcode(window.location.href);
+          $('#qrcode').fadeIn();
+          $("html").animate({ scrollTop: document.body.scrollHeight }, "slow");
+        }
+        if({{ votes }} > 0)
+        {
+          var options = "{{ options_text }}".split('█');
+          var votes = "{{ votes_text }}".split('█');
+          function addData(chart, label, data) {
+          chart.data.labels.push(label);
+          chart.data.datasets.forEach((dataset) => {
+          dataset.data.push(data);
+          var r=Math.floor(Math.random()*255+55);
+          r=r>255?255:r;
+          var b=Math.floor(Math.random()*255+55);
+          b=b>255?255:b;
+          var g=Math.floor(Math.random()*255+55);
+          g=g>255?255:g;
+          dataset.backgroundColor.push("rgb("+r+","+g+","+b+")");
+          dataset.borderColor.push("rgb(0,0,0)");
+          });
+          chart.update();
+          }
+          var ctx = document.getElementById("myChart").getContext('2d');
+          data = {datasets: [{data: [],backgroundColor: [], borderColor: [], borderWidth: 1}], labels: []};
+          var myPieChart = new Chart(ctx,{type: 'pie',data: data});
+          Chart.defaults.global.defaultFontFamily = 'Product Sans';
+          Chart.defaults.global.defaultFontColor = '#000';
+          for(var i=0;i<{{ numberOfOptions }};++i)
+            addData(myPieChart,options[i],Number(votes[i]));
+        }
+        else
+          $("#canvas-holder").html("Nobody has voted yet!");
+        function refresh_colours()
+        {
+          for(var i=0;i<{{ numberOfOptions }};++i)
+          {
+            var r=Math.floor(Math.random()*255+55);
+            r=r>255?255:r;
+            var b=Math.floor(Math.random()*255+55);
+            b=b>255?255:b;
+            var g=Math.floor(Math.random()*255+55);
+            g=g>255?255:g;
+            myPieChart.data.datasets[0].backgroundColor[i]="rgb("+r+","+g+","+b+")";
+          }
+          myPieChart.update();
+        }
+        async function clip()
+        {
+            var url = document.createElement('input');
+            document.body.appendChild(url);
+            url.value = window.location.href;
+            url.select();
+            document.execCommand('copy');
+            $('#copyNotification').fadeIn();
+            document.body.removeChild(url);
+            await new Promise(r => setTimeout(r, 2000));
+            $('#copyNotification').fadeOut();
+        }
+        function hideNotification()
+        {
+            $('#copyNotification').fadeOut();
+        }
+        function goto(id)
+        {
+            window.location.href='/poll/'+id;
+        }
+      </script>
+    </div>
+    <div id="share-buttons" align="right"></div>
+    <script>
+      var link=escape(window.location.href);
+      var title=escape(document.title);
+      $('#share-buttons').html('<span class="button is-static has-text-info" style="height: 50px; margin-top: 5px;">Share the results:</span>&nbsp;<!-- QR --><a><img src="/static/images/qr-code.svg" title="QR" onclick="qr()"/></a><!-- Clipboard --><a><img src="/static/images/copy.svg" title="Copy to Clipboard" onclick="clip()"/></a><!-- Email --><a href="mailto:?Subject=View results: '+document.title+'&amp;Body='+window.location.href+'"><img src="/static/images/email.svg" title="Email" /></a><!-- Facebook --><a href="http://www.facebook.com/sharer.php?u='+link+'" target="_blank"><img src="/static/images/facebook.svg" title="Facebook" /></a><!-- Twitter --><a href="https://twitter.com/share?url='+link+'&amp;text=Vote on: '+title+'" target="_blank"><img src="/static/images/twitter.svg" title="Twitter" /><!-- WhatsApp --><a href="https://wa.me/?text=View results: {{ question }} at '+window.location.href+'" target="_blank"><img src="/static/images/whatsapp.svg" title="WhatsApp" /></a><!-- LinkedIn --><a href="http://www.linkedin.com/shareArticle?mini=true&amp;url='+link+'" target="_blank"><img src="/static/images/linkedin.svg" title="LinkedIn" /></a><!-- Reddit --><a href="http://reddit.com/submit?url='+link+'&amp;title=View results%3A '+title+'" target="_blank"><img src="/static/images/reddit.svg" title="Reddit" /></a>');
+    </script>
+    <div id="copyNotification" class="notification is-warning" style="display:none;float:right">
+        <button class="delete" onclick="hideNotification()"></button>
+        Link to the results has been copied to clipboard
+    </div>
+    <center><div id="qrcode" style="display: none"></div></center>
+    {% if similar%}
+    <div>
+    <center class="title is-4"><span style="background-color: #4094FFDB; border-radius: 4px">&nbsp;Polls that might interest you&nbsp;</span></center>
+    {% for poll in similar_data %}
+    {{poll|safe}}
+    {% endfor %}
+    {% endif %}
+    </div>
+    <div class="column is-narrow">
+  </div>
+  </div>
+</body>
+</html>

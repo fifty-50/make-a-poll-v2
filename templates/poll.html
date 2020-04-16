@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ question }} - Make-a-Poll</title>
+    <link rel="shortcut icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="/static/css/bulma-0.8.0/css/bulma.min.css">
+    <link rel="stylesheet" href="/static/css/bulma-0.8.0/css/bulma-checkradio.min.css">
+    <link rel="stylesheet" href="/static/css/fontawesome-free-5.13.0-web/css/all.min.css">
+    <script type="text/javascript" src="/static/js/jquery-3.5.0.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.qrcode.min.js"></script>
+    <style type="text/css">
+        html
+        {
+            background: url(/static/images/back.png) no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            -webkit-font-smoothing: antialiased;
+            display: none;
+        }
+        .navbar.is-warning
+        {
+            background-color: #FFFF56;
+        }
+        .button.is-warning
+        {
+            background-color: #FFFF56;
+        }
+        .box
+        {
+            -webkit-font-smoothing: antialiased;
+            background-image: linear-gradient(#54BBFF, #4094FFDB);
+        }
+        #sim
+        {
+            position: relative;
+            background-image: linear-gradient(#54BBFF, #4094FFDB);
+            z-index: 1;
+        }
+        #sim::before
+        {
+          position: absolute;
+          content: "";
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          background-image: linear-gradient(#FFA2C9, #FF7FB5);
+          border-radius: 4px;
+          z-index: -1;
+          transition: opacity 0.7s ease;
+          opacity: 0;
+        }
+        #sim:hover::before
+        {
+          opacity: 1;
+          border-radius: 4px;
+        }
+        #sim:hover
+        {
+            cursor: pointer;
+        }
+        #share-buttons img
+        {
+            width: 50px;
+            padding: 5px;
+            border: 0;
+            box-shadow: 0;
+            display: inline;
+        }
+        #pollDat
+        {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        @font-face
+        {
+            font-family: ProductSans;
+            src: url(/static/fonts/ProductSans.woff2);
+        }
+        body
+        {
+            font-family: 'ProductSans', sans-serif;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .header
+        {
+            overflow: hidden;
+            background-color: #000;
+            padding: 10px 10px;
+        }
+        .header .logo
+        {
+            font-size: 20px;
+            text-align: center;
+            color: yellow;
+        }
+        a img:hover
+        {
+            outline: 2px dotted rgb(90, 164, 255);
+            -moz-outline-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header"><center><div class="logo"><span class="icon"><i class="fas fa-poll-h"></i>&nbsp;</span>Make-a-Poll</div></center></div>
+    <nav class="navbar is-warning" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/"><span class="icon"><i class="fas fa-home"></i></span>&nbsp;Make-a-Poll</a>
+            <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbar">
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+            </a>
+        </div>
+        <div id="navbar" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/popular"><span class="icon"><i class="fab fa-hotjar"></i></span>&nbsp;Popular polls</a>
+                <a class="navbar-item" href="/recent"><span class="icon"><i class="fas fa-history"></i></span>&nbsp;Recent polls</a>
+                <a class="navbar-item" href="/stats"><span class="icon"><i class="fas fa-chart-bar"></i></span>&nbsp;Statistics</a>
+                <a class="navbar-item" href="/about"><span class="icon"><i class="fas fa-info-circle"></i></span>&nbsp;About</a>
+            </div>
+        </div>
+        <div class="navbar-end"></div>
+    </nav>
+  <br>
+  <div class="columns" id="all" style="display: none">
+    <div class="column is-narrow"></div>
+    <div class="column">
+        <div id="pollDat"></div>
+        <script type="text/javascript">
+            $(document).ready(function()
+            {
+                $("#voteButton").prop('disabled','disabled');
+                $(".navbar-burger").click(function()
+                {
+                    $(".navbar-burger").toggleClass("is-active");
+                    $(".navbar-menu").toggleClass("is-active");
+                });
+                $('#all').fadeIn(300);
+            });
+            if(performance.navigation.type == 2)
+                location.reload(true);
+            async function wait_for_load()
+            {
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            wait_for_load();
+            var dat=$('#pollDat');
+            if({{ expired }}==0&&{{ limited }}==0)
+                $("html").show();
+            if({{ limited }})
+                window.location.replace("/poll/{{ poll_id }}/results");
+            var creationTime=new Date({{ creationTime }});
+            dat.innerHTML='<p class="title is-4">{{ question }}</p>'+'<p class="subtitle is-7">Votes: {{ votes }} | {{ time_text }}</p>';
+            if({{ expirable }})
+            {
+                if({{ expired }})
+                    window.location.replace("/poll/{{ poll_id }}/results");
+                var hours_text = 'hour';
+                var minutes_text = 'minute';
+                if({{ time_left }} > 1)
+                    hours_text += 's';
+                if({{ expiry_m }} > 1)
+                    minutes_text += 's';
+                if({{ time_left }}<=1)
+                    dat.innerHTML='<p class="title is-4">{{ question }}</p>'+'<p class="subtitle is-7">Votes: {{ votes }} | {{ time_text }} | Voting closes in {{ expiry_m }} '+ minutes_text +'</p>';
+                else
+                    dat.innerHTML='<p class="title is-4">{{ question }}</p>'+'<p class="subtitle is-7">Votes: {{ votes }} | {{ time_text }} | Voting closes in {{ expiry_h }} '+ hours_text +' and {{ expiry_m }} '+ minutes_text +'</p>';
+            }
+            else if({{ limited }} == 0)
+            {
+                $("html").show();
+            }
+            var options = "{{ options_text }}".split('█');
+            for(var i=1;i<={{ numberOfOptions }};++i)
+            {
+                dat.innerHTML += '<div class="field"><input class="is-checkradio is-small is-warning" type="radio" name="radios" id="Option'+ i +'" oninput="voteValid()"><label for="Option'+ i +'"><font size="3">'+ options[i-1] +'</font></label></div>';
+            }
+            $("#pollDat").html('<div class="box">'+dat.innerHTML+'</div>');
+            function voteValid()
+            {
+                $("#voteButton").prop('disabled',false);
+            }
+            function Vote()
+            {
+                $("#voteButton").addClass("is-loading");
+                for(var i=1;i<={{ numberOfOptions }};++i)
+                {
+                    if($('#Option'+i).is(':checked'))
+                        break;
+                }
+                $.ajax({url: '/poll/{{ poll_id }}/'+i, method: 'PATCH', success: async function(result){
+                    await new Promise(r => setTimeout(r, 500));
+                    window.location.href='/poll/{{ poll_id }}/results';
+                }, error: async function(result){
+                    await new Promise(r => setTimeout(r, 500));
+                    window.location.replace('/poll/{{ poll_id }}/results');
+                }});
+            }
+            async function Results()
+            {
+                $("#resultsButton").addClass("is-loading");
+                await new Promise(r => setTimeout(r, 100));
+                window.location.href="/poll/{{ poll_id }}/results";
+            }
+            var qr_shown=0;
+            function qr()
+            {
+                if(qr_shown==1)
+                {
+                    $("html").animate({ scrollTop: 0 }, "fast",function(){qr_shown=0;
+                    $('#qrcode').fadeOut();
+                    $('#qrcode').empty();});
+                    return;
+                }
+                qr_shown=1;
+                $('#qrcode').qrcode(window.location.href);
+                $('#qrcode').fadeIn();
+                $("html").animate({ scrollTop: document.body.scrollHeight }, "slow");
+            }
+            async function clip()
+            {
+                var url = document.createElement('input');
+                document.body.appendChild(url);
+                url.value = window.location.href;
+                url.select();
+                document.execCommand('copy');
+                $('#copyNotification').fadeIn();
+                document.body.removeChild(url);
+                await new Promise(r => setTimeout(r, 2000));
+                $('#copyNotification').fadeOut();
+            }
+            function hideNotification()
+            {
+                $('#copyNotification').fadeOut();
+            }
+            function goto(id)
+            {
+                window.location.href='/poll/'+id;
+            }
+        </script>
+        <br>
+        <button class="button is-link" onclick="Vote()" id="voteButton"><font face="Roboto"><span class="icon is-small"><i class="far fa-check-circle"></i></span><span>Vote</span></font></button>
+        <button class="button is-warning" onclick="Results()" id="resultsButton"><font face="Roboto"><span class="icon is-small"><i class="fas fa-chart-pie"></i></span><span>View Results</span></font></button>
+        <br><br><span class="button is-static has-text-info" style="margin-top: 5px;">Share this poll:</span>
+        <span id="share-buttons"></span>
+        <script>
+            var sb=document.getElementById("share-buttons");
+            var link=escape(window.location.href);
+            var title=escape(document.title);
+            sb.innerHTML='<!-- QR --><a><img src="/static/images/qr-code.svg" title="QR" onclick="qr()"/></a><!-- Clipboard --><a><img src="/static/images/copy.svg" title="Copy to Clipboard" onclick="clip()"/></a><!-- Email --><a href="mailto:?Subject=Vote on: '+document.title+'&amp;Body='+window.location.href+'"><img src="/static/images/email.svg" title="Email" /></a><!-- Facebook --><a href="http://www.facebook.com/sharer.php?u='+link+'" target="_blank"><img src="/static/images/facebook.svg" title="Facebook" /></a><!-- Twitter --><a href="https://twitter.com/share?url='+link+'&amp;text=Vote on: '+title+'" target="_blank"><img src="/static/images/twitter.svg" title="Twitter" /><!-- WhatsApp --><a href="https://wa.me/?text=Vote on: {{ question }} at '+window.location.href+'" target="_blank"><img src="/static/images/whatsapp.svg" title="WhatsApp" /></a><!-- LinkedIn --><a href="http://www.linkedin.com/shareArticle?mini=true&amp;url='+link+'" target="_blank"><img src="/static/images/linkedin.svg" title="LinkedIn" /></a><!-- Reddit --><a href="http://reddit.com/submit?url='+link+'&amp;title=Vote on%3A '+title+'" target="_blank"><img src="/static/images/reddit.svg" title="Reddit" /></a>';
+        </script>
+        <div id="copyNotification" class="notification is-warning" style="display:none;float:right">
+            <button class="delete" onclick="hideNotification()"></button>
+            Link to this poll has been copied to clipboard
+        </div>
+        <center><div id="qrcode" style="display: none"></div></center>
+        {% if similar%}
+        <br>
+        <div>
+        <center class="title is-4"><span style="background-color: #FF7FB5; border-radius: 4px">&nbsp;Polls that might interest you&nbsp;</span></center>
+        {% for poll in similar_data %}
+        {{poll|safe}}
+        {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    <div class="column is-narrow"></div>
+  </div>
+
+</body>
