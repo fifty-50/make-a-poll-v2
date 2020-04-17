@@ -186,7 +186,7 @@ def votes(poll_id):
 
 @app.route('/popular', methods=['GET'])
 def popular():
-    popular_polls = [_ for _ in polls.find({'private': {'$exists': False}}, {'_id': False}).sort('votes', -1)]
+    popular_polls = [_ for _ in polls.find({'private': {'$exists': False}}, {'_id': False}).sort('votes', -1)][:11]
     polls_data = []
     for poll in popular_polls:
         time_text = datetime.fromtimestamp(poll['creationTime']).strftime("Created on %A, %B %d, %Y at %#I:%M %p")
@@ -199,7 +199,7 @@ def popular():
 
 @app.route('/recent', methods=['GET'])
 def recent():
-    recent_polls = [_ for _ in polls.find({'private': {'$exists': False}}, {'_id': False}).sort('creationTime', -1)]
+    recent_polls = [_ for _ in polls.find({'private': {'$exists': False}}, {'_id': False}).sort('creationTime', -1)][:11]
     polls_data = []
     for poll in recent_polls:
         time_text = datetime.fromtimestamp(poll['creationTime']).strftime("Created on %A, %B %d, %Y at %#I:%M %p")
