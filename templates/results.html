@@ -222,7 +222,7 @@
         }
         if({{ votes }} > 0)
         {
-          var options = "{{ options_text }}".split('█');
+          var options = "{{ options_text|safe }}".split('█');
           var votes = "{{ votes_text }}".split('█');
           function addData(chart, label, data) {
           chart.data.labels.push(label);

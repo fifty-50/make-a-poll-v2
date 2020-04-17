@@ -30,6 +30,7 @@ def create():
     else:
         poll.pop('limit')
         poll['limitValue'] = int(poll['limitValue'])
+    poll['question'] = poll['question'].strip()
     poll['votes'] = 0
     poll['creationTime'] = int(time())
     while True:
@@ -37,7 +38,7 @@ def create():
         if polls.count_documents({'id': poll_id}) == 0:
             break
     poll['id'] = poll_id
-    options = [{'id': poll_id, 'option': v, 'votes': 0} for k, v in
+    options = [{'id': poll_id, 'option': v.strip(), 'votes': 0} for k, v in
                 form_data.items() if k.startswith('option') and v]
     op_num = 1
     for option in options:
@@ -58,7 +59,9 @@ def categorize(poll_id):
                              json={'key': 'f30037c59ff5341084d6555bf6bbfc18',
                                    'title':poll['question'], 'txt':options_txt,
                                    'model':'IAB_en'}).json()['category_list'][0]['code']
-    category = category[:category.find('>')]
+    subtopic = category.find('>')
+    if subtopic != -1:
+        category = category[:subtopic]
     polls.update_one({'id': poll_id}, {'$set': {'category': category}})
     return flask.Response(status=200)   
 
@@ -89,7 +92,7 @@ def view(poll_id):
         options_text += option['option'] + '█'
     options_text = options_text[:-1]
     if poll['category'] != 'Uncategorized':
-        similar_polls = polls.find({'$and': [{'category': poll['category']}, {'id': {'$ne': poll['id']}}]})
+        similar_polls = polls.find({'$and': [{'category': poll['category']}, {'private': {'$exists': False}}, {'id': {'$ne': poll['id']}}]}).sort('votes', -1)
         similar_polls = [_ for _ in similar_polls]
         similar = len(similar_polls)>0
         similar_data = []
@@ -151,7 +154,7 @@ def results(poll_id):
     options_text = options_text[:-1]
     votes_text = votes_text[:-1]
     if poll['category'] != 'Uncategorized':
-        similar_polls = polls.find({'$and': [{'category': poll['category']}, {'id': {'$ne': poll['id']}}]})
+        similar_polls = polls.find({'$and': [{'category': poll['category']}, {'private': {'$exists': False}}, {'id': {'$ne': poll['id']}}]}).sort('votes', -1)
         similar_polls = [_ for _ in similar_polls]
         similar = len(similar_polls)>0
         similar_data = []
